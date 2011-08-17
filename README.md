@@ -16,6 +16,7 @@ License and Attribution
 -----------------------
 
 skHTMLValidatorPlugin by [Studio Skylab](http://www.studioskylab.com)
+
 This code is released under the [Creative Commons Attribution-ShareAlike 3.0 License](http://creativecommons.org/licenses/by-sa/3.0/).
 
 All the hard work was done by the following:
