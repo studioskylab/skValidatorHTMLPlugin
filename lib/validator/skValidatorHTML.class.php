@@ -300,11 +300,17 @@ class skValidatorHTML extends sfValidatorBase
 	protected function processRemoveBlanks($data)
 	{
 		if (count($this->getOption('remove_blanks'))) {
-			return $data;
-		}
+			$tags = implode('|', $this->getOption('remove_blanks'));
 
-		$tags = implode('|', $this->getOption('remove_blanks'));
-		$data = preg_replace("/<({$tags})(\s[^>]*)?(><\\/\\1>|\\/>)/", '', $data);
+			while (1) {
+				$len  = strlen($data);
+				$data = preg_replace("/<({$tags})(\s[^>]*)?(><\\/\\1>|\\/>)/", '', $data);
+
+				if ($len == strlen($data)) {
+					break;
+				}
+			}
+		}
 
 		return $data;
 	}
