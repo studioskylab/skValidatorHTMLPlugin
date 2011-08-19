@@ -200,7 +200,7 @@ class skValidatorHTML extends sfValidatorBase
 			}
 
 			if (!in_array($name, $this->getOption('no_close'))) {
-				if ($this->tag_counts[$name]) {
+				if (isset($this->tag_counts[$name]) && $this->tag_counts[$name]) {
 					$this->tag_counts[$name]--;
 					return '</'.$name.'>';
 				}
@@ -279,7 +279,7 @@ class skValidatorHTML extends sfValidatorBase
 	 **/
 	protected function processParamProtocol($data)
 	{
-		$data = $this->decodeEntities($data, true);
+		$data = $this->validateEntities($data, true);
 
 		if (preg_match('/^([^:]+)\:/si', $data, $matches)) {
 			if (!in_array($matches[1], $this->getOption('allowed_protocols'))) {
@@ -360,7 +360,7 @@ class skValidatorHTML extends sfValidatorBase
 	 **/
 	protected function fixCaseInner($m)
 	{
-		$m = mb_strtolower($m[2]);
+		$data = mb_strtolower($m[2]);
 
 		$data = preg_replace_callback(
 			'/(^|[^\w\s\';,\\-])(\s*)([a-z])/',
@@ -384,7 +384,7 @@ class skValidatorHTML extends sfValidatorBase
 	 * @return void
 	 * @author 
 	 **/
-	function validate_entities($data, $in_attribute)
+	function validateEntities($data, $in_attribute)
 	{
 		/* turn ascii characters into their actual characters, if requested.
 		   we need to always do this inside URLs to avoid people using
@@ -434,7 +434,7 @@ class skValidatorHTML extends sfValidatorBase
 	protected function cleanupNonTagsInner($m)
 	{
 		// first, deal with the entities
-		$m[2] = $this->decodeEntities($m[2], false);
+		$m[2] = $this->validateEntities($m[2], false);
 
 		/* find any literal quotes outside of tags and replace them 
 		   with &quot;. we call it last thing before returning. */
