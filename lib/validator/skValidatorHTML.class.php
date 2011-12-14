@@ -61,6 +61,12 @@ class skValidatorHTML extends sfValidatorBase
 			'mailto',
 		));
 
+		// css properties allowed in 'style' attibute of tag
+		// set to true to allow all properties
+		$this->addOption('allowed_css_properties', array(
+			'img' => array('width', 'height', 'border'),
+		));
+
 		// tags which should be removed if they contain no content (e.g. "<b></b>" or "<b />")
 		$this->addOption('remove_blanks', array(
 			'a',
@@ -93,7 +99,6 @@ class skValidatorHTML extends sfValidatorBase
 		 *
 		 * this options overrides allow_numbered_entities
 		 **/
-
 		$this->addOption('normalise_ascii_entities', false);
 	}
 
@@ -232,6 +237,11 @@ class skValidatorHTML extends sfValidatorBase
 					if (in_array($pname, $this->getOption('protocol_attributes'))) {
 						$value = $this->processParamProtocol($value);
 					}
+
+					if ($pname == 'style') {
+						$value = $this->processStyleAttribute($name, $value);
+					}
+
 					$params .= ' '.$pname.'="'.$value.'"';
 				}
 			}
@@ -289,6 +299,62 @@ class skValidatorHTML extends sfValidatorBase
 
 		return $data;
 	}
+
+
+	/**
+	 * Strips CSS declarations which are not in allowed_css_properties from the
+	 * given style attribute
+	 *
+	 * @param string $tag Tag name
+	 * @param string $data Dirty style attribute
+	 * @return string Cleaned style attribute
+	 * @author Peter Grochowski
+	 * @author Jaik Dean
+	 **/
+	protected function processStyleAttribute($tag, $data)
+	{
+		// get the allowed properties
+		$allowed_properties = $this->getOption('allowed_css_properties');
+
+		// if the tag isn't in the allowed properties, empty the attribute
+		if (!array_key_exists($tag, $allowed_properties)) {
+			return '';
+		}
+
+		// get the allowed properties for this tag
+		$allowed = $allowed_properties[$tag];
+
+		// if the allowed properties are true, all properties are allowed
+		if ($allowed === true) {
+			return $data;
+		}
+
+		// get the individual CSS declarations
+		$declarations = explode(';', $data);
+		$data         = array();
+
+		// add only properties from allowed list
+		foreach ($declarations as $declaration) {
+			if (strlen(trim($declaration)) == 0) {
+				continue;
+			}
+
+			// get the property and value
+			$parts    = explode(':', $declaration, 2);
+			$property = trim($parts[0]);
+			$value    = trim($parts[1]);
+
+			// check if the property is allowed for this tag
+			if (in_array($property, $allowed)) {
+				$data[] = $property.':'.$value;
+			}
+		}
+
+		// create new CSS string
+		$data = implode(';', $data);
+
+		return $data;
+    }
 
 
 	/**
