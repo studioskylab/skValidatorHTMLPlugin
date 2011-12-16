@@ -86,6 +86,7 @@ class skValidatorHTML extends sfValidatorBase
 			'amp',
 			'gt',
 			'lt',
+			'nbsp',
 			'quot',
 		));
 
